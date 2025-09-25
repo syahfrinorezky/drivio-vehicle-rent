@@ -1,0 +1,240 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- ENUMS ----------
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
+}
+
+enum TransmissionType {
+  MANUAL
+  AUTOMATIC
+}
+
+enum FuelType {
+  GASOLINE
+  DIESEL
+  HYBRID
+}
+
+enum VehicleType {
+  CAR
+  MOTORCYCLE
+}
+
+enum VehicleStatus {
+  AVAILABLE
+  UNAVAILABLE
+  MAINTENANCE
+}
+
+enum VehicleLevel {
+  ECONOMY
+  STANDARD
+  LUXURY
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum DriverOption {
+  WITH_DRIVER
+  WITHOUT_DRIVER
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+// ---------- USERS ----------
+model Users {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
+  password   String
+  verifiedAt DateTime?
+  role       Role      @default(USER)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  bookings           Bookings[]
+  ProfileUsers       ProfileUsers?
+  ProfileAdmins      ProfileAdmins?
+  ProfileSuperAdmins ProfileSuperAdmins?
+  EmailVerifications EmailVerifications?
+  PasswordResets     PasswordResets[]
+  Reviews            Reviews[]
+}
+
+// ---------- USER PROFILES ----------
+model ProfileUsers {
+  id          Int       @id @default(autoincrement())
+  userId      Int       @unique
+  fullName    String
+  phone       String
+  address     String
+  city        String
+  country     String
+  idCardPhoto String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  Users Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ProfileAdmins {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @unique
+  fullName  String
+  phone     String
+  address   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  Users Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ProfileSuperAdmins {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @unique
+  fullName  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  Users Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ---------- EMAIL & PASSWORD ----------
+model EmailVerifications {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  email     String
+  otp       String
+  sentAt    DateTime @default(now())
+  expiresAt DateTime
+
+  Users Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResets {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String
+  sentAt    DateTime @default(now())
+  expiresAt DateTime
+
+  Users Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ---------- VEHICLES ----------
+model Vehicles {
+  id           Int              @id @default(autoincrement())
+  vehicleName  String
+  brand        String
+  model        String
+  year         Int
+  licensePlate String           @unique
+  fuel         FuelType
+  transmission TransmissionType
+  type         VehicleType
+  vehicleLevel VehicleLevel
+  basePrice    Float
+  status       VehicleStatus    @default(AVAILABLE)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  deletedAt    DateTime?
+
+  Bookings      Bookings[]
+  VehiclePhotos VehiclePhotos[]
+  Reviews       Reviews[]
+
+  @@index([vehicleName])
+  @@index([transmission])
+  @@index([type])
+  @@index([vehicleLevel])
+}
+
+// ---------- VEHICLE PHOTOS ----------
+model VehiclePhotos {
+  id        Int       @id @default(autoincrement())
+  vehicleId Int
+  photoUrl  String
+  isPrimary Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  Vehicles Vehicles @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+}
+
+// ---------- BOOKINGS ----------
+model Bookings {
+  id           Int           @id @default(autoincrement())
+  userId       Int
+  vehicleId    Int?
+  vehicleName  String
+  vehicleLevel VehicleLevel
+  startDate    DateTime
+  endDate      DateTime
+  driver       DriverOption
+  totalPrice   Float
+  status       BookingStatus @default(PENDING)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+
+  Users    Users      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Vehicles Vehicles?  @relation(fields: [vehicleId], references: [id])
+  Payments Payments[]
+
+  @@index([vehicleLevel])
+  @@index([status])
+}
+
+// ---------- PAYMENTS ----------
+model Payments {
+  id            Int           @id @default(autoincrement())
+  bookingId     Int
+  amount        Float
+  status        PaymentStatus @default(PENDING)
+  gateway       String
+  transactionId String        @unique
+  paymentUrl    String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  Bookings Bookings @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+// ---------- REVIEWS ----------
+model Reviews {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  vehicleId Int
+  rating    Int
+  comment   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  Users    Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Vehicles Vehicles @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+}
