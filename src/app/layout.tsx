@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat, Poppins } from "next/font/google";
 import clsx from "clsx";
 import "@/style/globals.css";
+import PublicHeader from "@/components/layout/headers/PublicHeader";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -16,9 +17,9 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "Drivio - Rent Cars Easily",
+  title: "Drivio - Rent Vehicles Easily",
   description:
-    "Rent cars easily with Drivio. Choose from a wide range of vehicles and enjoy a seamless rental experience.",
+    "Rent vehicles easily with Drivio. Choose from a wide range of vehicles and enjoy a seamless rental experience.",
   icons: {
     icon: "/logo/drivio-black.svg",
   },
@@ -38,6 +39,7 @@ export default function RootLayout({
           "font-sans antialiased"
         )}
       >
+        <PublicHeader />
         <main>{children}</main>
       </body>
     </html>
