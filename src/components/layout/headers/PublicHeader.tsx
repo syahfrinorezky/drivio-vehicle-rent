@@ -26,8 +26,8 @@ function PublicHeader() {
           scrolled ? "bg-white/20 backdrop-blur-sm shadow-md" : "bg-white"
         )}
       >
-        <div className="container mx-auto px-2 py-3 flex justify-between items-center">
-          <Link href="/" className="px-3">
+        <div className="container mx-auto px-2 py-3 md:px-0 md:max-w-3xl lg:max-w-7xl flex justify-between items-center">
+          <Link href="/" className="px-3 md:px-0">
             <Image
               src={"/logo/drivio-black.svg"}
               alt="Drivio Logo"
