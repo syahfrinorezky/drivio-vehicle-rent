@@ -10,6 +10,8 @@ import {
   IoPersonOutline,
   IoTicket,
   IoTicketOutline,
+  IoMailOpenSharp,
+  IoMailUnreadOutline,
 } from "react-icons/io5";
 
 export type NavigationItem = {
@@ -37,6 +39,12 @@ const publicNavigation: NavigationItem[] = [
     href: "/reviews",
     Icon: IoStarOutline,
     ActiveIcon: IoStar,
+  },
+  {
+    name: "Contact",
+    href: "/contact",
+    Icon: IoMailUnreadOutline,
+    ActiveIcon: IoMailOpenSharp,
   },
 ];
 
